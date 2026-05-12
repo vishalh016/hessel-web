@@ -1,177 +1,411 @@
 "use client";
-import { useState } from "react";
-import { MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import { waLink } from "@/lib/config";
-
-const eventTypes = ["Wedding", "Reception", "Birthday", "Corporate Event", "Housewarming", "Bengali Traditional"];
-const cuisines = ["Bengali", "Fusion", "Continental", "Multi-Cuisine"];
-
-const menuCombos = [
-  { name: "Classic Bengali Elegance", desc: "A full traditional Bengali spread — from luchi-alur dom to ilish maach and mishti doi.", items: ["Luchi & Alur Dom", "Shorshe Ilish", "Kosha Mangsho", "Dal Makhani", "Pulao", "Mishti Doi", "Rasgulla"], base: 650 },
-  { name: "Fusion Modern", desc: "A contemporary blend of Bengali classics with modern international flavors.", items: ["Paneer Tikka", "Pasta Station", "Bengali Fish Curry", "Continental Salad Bar", "Mocktail Bar", "Dessert Platter"], base: 750 },
-  { name: "Grand Celebration", desc: "A lavish multi-cuisine feast for larger-than-life events.", items: ["Live Biryani Counter", "BBQ Station", "Bengali Spread", "Continental Corner", "Live Dessert Counter", "Beverage Bar"], base: 950 },
-];
-
-const addOns = [
-  { name: "Biryani Counter", icon: "🍛", price: 80 },
-  { name: "BBQ Station", icon: "🔥", price: 120 },
-  { name: "Dessert Station", icon: "🍮", price: 60 },
-  { name: "Beverage Bar", icon: "🥤", price: 50 },
-];
+import { useState, useMemo } from "react";
+import { 
+  Plus, 
+  Minus, 
+  MessageCircle, 
+  Calendar, 
+  Users, 
+  Utensils, 
+  Leaf, 
+  ChevronDown, 
+  ChevronUp,
+  Clock,
+  Check
+} from "lucide-react";
+import { BUSINESS_INFO, waLink } from "@/lib/config";
+import { INITIAL_MENU_ITEMS, MENU_CATEGORIES, SERVICE_OPTIONS, MenuItem } from "@/lib/menuData";
 
 export default function MenuBuilder() {
-  const [step, setStep] = useState(1);
-  const [eventType, setEventType] = useState("");
-  const [guests, setGuests] = useState(100);
-  const [cuisine, setCuisine] = useState("");
-  const [menuIdx, setMenuIdx] = useState<number | null>(null);
-  const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
+  // State
+  const [eventDetails, setEventDetails] = useState({
+    type: "",
+    guests: 100,
+    date: "",
+    notes: ""
+  });
+  const [isVegOnly, setIsVegOnly] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<{[key: string]: number}>({});
+  const [selectedServices, setSelectedServices] = useState<string[]>(["buffet"]);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([MENU_CATEGORIES[0], MENU_CATEGORIES[1]]);
 
-  const toggleAddOn = (name: string) =>
-    setSelectedAddOns(prev => prev.includes(name) ? prev.filter(a => a !== name) : [...prev, name]);
+  // Filtered menu items
+  const menuItems = useMemo(() => {
+    return isVegOnly 
+      ? INITIAL_MENU_ITEMS.filter(item => item.isVeg && item.isAvailable)
+      : INITIAL_MENU_ITEMS.filter(item => item.isAvailable);
+  }, [isVegOnly]);
 
-  const totalPerPlate = menuIdx !== null
-    ? menuCombos[menuIdx].base + addOns.filter(a => selectedAddOns.includes(a.name)).reduce((s, a) => s + a.price, 0)
-    : 0;
-  const total = totalPerPlate * guests;
+  // Derived state
+  const totalPerPlate = useMemo(() => {
+    const itemsCost = Object.entries(selectedItems).reduce((acc, [id, qty]) => {
+      const item = INITIAL_MENU_ITEMS.find(i => i.id === id);
+      return acc + (item ? item.pricePerPlate * qty : 0);
+    }, 0);
+    
+    const servicesCost = selectedServices.reduce((acc, id) => {
+      const service = SERVICE_OPTIONS.find(s => s.id === id);
+      return acc + (service ? service.price : 0);
+    }, 0);
 
-  const confirmLink = waLink(`Hi Halder's Hessel! I've built my menu:\n\nEvent: ${eventType}\nGuests: ${guests}\nCuisine: ${cuisine}\nMenu: ${menuIdx !== null ? menuCombos[menuIdx].name : ""}\nAdd-ons: ${selectedAddOns.join(", ") || "None"}\nEstimate: ₹${total.toLocaleString("en-IN")}\n\nPlease confirm my booking!`);
+    return itemsCost + servicesCost;
+  }, [selectedItems, selectedServices]);
 
-  const inputStyle = { padding: "11px 14px", fontFamily: "'Outfit',sans-serif", fontSize: "0.85rem", cursor: "pointer", borderRadius: "2px", transition: "all 0.3s ease", textAlign: "left" as const };
+  const totalEstimate = totalPerPlate * eventDetails.guests;
+
+  // Handlers
+  const toggleCategory = (cat: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const addItem = (id: string) => {
+    setSelectedItems(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+  };
+
+  const removeItem = (id: string) => {
+    setSelectedItems(prev => {
+      const next = { ...prev };
+      if (next[id] > 1) next[id] -= 1;
+      else delete next[id];
+      return next;
+    });
+  };
+
+  const toggleService = (id: string) => {
+    setSelectedServices(prev => 
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    );
+  };
+
+  const generateWhatsAppLink = () => {
+    const itemsList = Object.entries(selectedItems)
+      .map(([id, qty]) => {
+        const item = INITIAL_MENU_ITEMS.find(i => i.id === id);
+        return item ? `• ${item.name} (${qty}x)` : "";
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    const message = `Hi ${BUSINESS_INFO.name}! I've built a custom menu:\n\n` +
+      `📅 Event: ${eventDetails.type || "Not specified"}\n` +
+      `👥 Guests: ${eventDetails.guests}\n` +
+      `📅 Date: ${eventDetails.date || "Not specified"}\n` +
+      `🍽️ Services: ${selectedServices.join(", ")}\n\n` +
+      `🥘 Selected Items:\n${itemsList}\n\n` +
+      `💰 Est. Total: ₹${totalEstimate.toLocaleString("en-IN")}\n\n` +
+      `Please get in touch to finalize!`;
+    
+    return waLink(message);
+  };
 
   return (
-    <section id="menu-builder" className="section-pad" style={{ background: "var(--bg-dark)" }}>
-      <div style={{ textAlign: "center", padding: "0 24px", marginBottom: 56 }}>
-        <span className="section-label">Interactive Menu Builder</span>
-        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 700, color: "var(--warm-white)", lineHeight: 1.25 }}>
-          Craft Your <em style={{ color: "var(--gold)", fontStyle: "italic" }}>Perfect</em> Menu
-        </h2>
-        <p style={{ marginTop: 12, color: "var(--text-muted)", fontFamily: "'Outfit',sans-serif", fontSize: "0.95rem" }}>
-          Build a customized dining experience in minutes
-        </p>
-      </div>
-
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 24px" }}>
-        {/* Progress */}
-        <div style={{ display: "flex", gap: 4, marginBottom: 40 }}>
-          {[1, 2, 3, 4, 5].map(s => (
-            <div key={s} style={{ flex: s === step ? 2 : 1, height: 3, borderRadius: 2, background: s <= step ? "var(--gold)" : "rgba(201,161,74,0.15)", transition: "all 0.4s ease" }} />
-          ))}
+    <section id="menu-builder" className="section-pad" style={{ background: "var(--bg-ivory)" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+        
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: 64 }}>
+          <span className="section-label" style={{ color: "var(--gold-dark)" }}>Curate Your Experience</span>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 700, color: "var(--text-dark)", lineHeight: 1.1 }}>
+            The <em style={{ color: "var(--maroon)", fontStyle: "italic" }}>Art</em> of Fine Dining
+          </h2>
+          <p style={{ marginTop: 16, color: "var(--text-dark-muted)", fontFamily: "'Outfit', sans-serif", fontSize: "1rem", maxWidth: 600, margin: "16px auto 0" }}>
+            Design a bespoke culinary journey for your guests. Select from our heritage recipes and modern fusion specialties.
+          </p>
         </div>
 
-        <div className="luxury-card" style={{ padding: "40px 36px" }}>
-          <p style={{ fontSize: "0.7rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--gold)", fontFamily: "'Outfit',sans-serif", marginBottom: 8 }}>Step {step} of 5</p>
-
-          {/* Step 1 */}
-          {step === 1 && (
-            <div>
-              <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.3rem", color: "var(--warm-white)", marginBottom: 24 }}>Confirm Event Details</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 28 }}>
-                {eventTypes.map(e => (
-                  <button key={e} onClick={() => setEventType(e)} style={{ ...inputStyle, background: eventType === e ? "var(--maroon)" : "rgba(255,255,255,0.03)", border: eventType === e ? "1px solid var(--maroon-light)" : "1px solid rgba(201,161,74,0.15)", color: eventType === e ? "var(--warm-white)" : "var(--text-muted)" }}>{e}</button>
-                ))}
-              </div>
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, fontFamily: "'Outfit',sans-serif", fontSize: "0.85rem" }}>
-                  <span style={{ color: "var(--text-muted)" }}>Guest Count</span>
-                  <span style={{ color: "var(--gold)", fontWeight: 600 }}>{guests} guests</span>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 48, alignItems: "start" }} className="builder-layout">
+          
+          {/* Main Builder Area */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+            
+            {/* 1. Event Details Section */}
+            <div className="luxury-card-light" style={{ padding: "32px" }}>
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.3rem", color: "var(--text-dark)", marginBottom: 24, display: "flex", alignItems: "center", gap: 12 }}>
+                <Calendar size={20} color="var(--gold-dark)" />
+                Event Particulars
+              </h3>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }} className="details-grid">
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--maroon)", fontWeight: 600, marginBottom: 8 }}>Event Type</label>
+                  <select 
+                    value={eventDetails.type}
+                    onChange={e => setEventDetails(prev => ({ ...prev, type: e.target.value }))}
+                    style={{ width: "100%", padding: "12px 16px", background: "white", border: "1px solid rgba(201, 161, 74, 0.2)", borderRadius: "4px", fontSize: "0.95rem", color: "var(--text-dark)", outline: "none" }}
+                  >
+                    <option value="">Select an event</option>
+                    <option value="Wedding">Grand Wedding</option>
+                    <option value="Reception">Elegant Reception</option>
+                    <option value="Birthday">Birthday Celebration</option>
+                    <option value="Corporate">Corporate Gala</option>
+                    <option value="Traditional">Traditional Ceremony</option>
+                  </select>
                 </div>
-                <input type="range" min={20} max={1000} step={10} value={guests} onChange={e => setGuests(Number(e.target.value))} />
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--maroon)", fontWeight: 600, marginBottom: 8 }}>Estimated Guests</label>
+                  <div style={{ position: "relative" }}>
+                    <Users size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--gold-dark)" }} />
+                    <input 
+                      type="number"
+                      value={eventDetails.guests}
+                      onChange={e => setEventDetails(prev => ({ ...prev, guests: parseInt(e.target.value) || 0 }))}
+                      style={{ width: "100%", padding: "12px 16px 12px 42px", background: "white", border: "1px solid rgba(201, 161, 74, 0.2)", borderRadius: "4px", fontSize: "0.95rem", color: "var(--text-dark)", outline: "none" }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--maroon)", fontWeight: 600, marginBottom: 8 }}>Preferred Date</label>
+                  <input 
+                    type="date"
+                    value={eventDetails.date}
+                    onChange={e => setEventDetails(prev => ({ ...prev, date: e.target.value }))}
+                    style={{ width: "100%", padding: "12px 16px", background: "white", border: "1px solid rgba(201, 161, 74, 0.2)", borderRadius: "4px", fontSize: "0.95rem", color: "var(--text-dark)", outline: "none" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--maroon)", fontWeight: 600, marginBottom: 8 }}>Special Requirements</label>
+                  <input 
+                    type="text"
+                    placeholder="e.g. Allergies, themes..."
+                    value={eventDetails.notes}
+                    onChange={e => setEventDetails(prev => ({ ...prev, notes: e.target.value }))}
+                    style={{ width: "100%", padding: "12px 16px", background: "white", border: "1px solid rgba(201, 161, 74, 0.2)", borderRadius: "4px", fontSize: "0.95rem", color: "var(--text-dark)", outline: "none" }}
+                  />
+                </div>
               </div>
             </div>
-          )}
 
-          {/* Step 2 */}
-          {step === 2 && (
-            <div>
-              <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.3rem", color: "var(--warm-white)", marginBottom: 24 }}>Select Cuisine Style</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                {cuisines.map(c => (
-                  <button key={c} onClick={() => setCuisine(c)} style={{ padding: "20px", background: cuisine === c ? "rgba(201,161,74,0.1)" : "rgba(255,255,255,0.03)", border: cuisine === c ? "1px solid var(--gold)" : "1px solid rgba(201,161,74,0.15)", color: cuisine === c ? "var(--gold)" : "var(--text-muted)", fontFamily: "'Playfair Display',serif", fontSize: "1rem", cursor: "pointer", borderRadius: "2px", transition: "all 0.3s ease" }}>{c}</button>
-                ))}
+            {/* 2. Veg Only Toggle */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 20px", background: isVegOnly ? "rgba(34, 197, 94, 0.03)" : "rgba(201, 161, 74, 0.04)", border: "1px solid var(--border-gold)", borderRadius: "2px", transition: "all 0.4s ease" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: isVegOnly ? "#22c55e" : "var(--gold-light)", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.4s ease", opacity: isVegOnly ? 1 : 0.4 }}>
+                  <Leaf size={14} color={isVegOnly ? "white" : "var(--gold-dark)"} />
+                </div>
+                <div>
+                  <h4 style={{ fontSize: "0.8rem", color: "var(--text-dark)", fontWeight: 600 }}>Vegetarian Only</h4>
+                </div>
               </div>
+              <button 
+                onClick={() => setIsVegOnly(!isVegOnly)}
+                style={{
+                  width: 40,
+                  height: 22,
+                  background: isVegOnly ? "#22c55e" : "rgba(0,0,0,0.08)",
+                  borderRadius: 11,
+                  position: "relative",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease"
+                }}
+              >
+                <div style={{
+                  width: 16,
+                  height: 16,
+                  background: "white",
+                  borderRadius: "50%",
+                  position: "absolute",
+                  top: 3,
+                  left: isVegOnly ? 21 : 3,
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.15)"
+                }} />
+              </button>
             </div>
-          )}
 
-          {/* Step 3 */}
-          {step === 3 && (
-            <div>
-              <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.3rem", color: "var(--warm-white)", marginBottom: 24 }}>Choose Your Menu</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                {menuCombos.map((m, i) => (
-                  <div key={i} onClick={() => setMenuIdx(i)} className="luxury-card"
-                    style={{ padding: "20px 24px", cursor: "pointer", border: menuIdx === i ? "1px solid var(--gold)" : undefined, background: menuIdx === i ? "rgba(201,161,74,0.06)" : "rgba(255,255,255,0.02)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                      <h4 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1rem", color: "var(--warm-white)" }}>{m.name}</h4>
-                      <span style={{ color: "var(--gold)", fontFamily: "'Outfit',sans-serif", fontSize: "0.85rem", fontWeight: 600 }}>₹{m.base}/plate</span>
+            {/* 3. Categorized Menu Sections */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {MENU_CATEGORIES.map(category => {
+                const items = menuItems.filter(i => i.category === category);
+                if (items.length === 0) return null;
+                const isExpanded = expandedCategories.includes(category);
+
+                return (
+                  <div key={category} className="luxury-card-light" style={{ overflow: "hidden", transition: "all 0.3s ease" }}>
+                    <button 
+                      onClick={() => toggleCategory(category)}
+                      style={{ width: "100%", padding: "24px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                    >
+                      <div>
+                        <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.2rem", color: "var(--text-dark)" }}>{category}</h4>
+                        <p style={{ fontSize: "0.75rem", color: "var(--text-dark-muted)", marginTop: 4 }}>{items.length} Options Available</p>
+                      </div>
+                      <div style={{ color: "var(--gold-dark)" }}>
+                        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                      </div>
+                    </button>
+
+                    <div style={{ 
+                      maxHeight: isExpanded ? "2000px" : "0", 
+                      opacity: isExpanded ? 1 : 0,
+                      transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                      padding: isExpanded ? "0 32px 32px" : "0 32px",
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+                      gap: 20
+                    }}>
+                      {items.map(item => (
+                        <div key={item.id} style={{ 
+                          padding: "16px", 
+                          background: selectedItems[item.id] ? "var(--bg-champagne)" : "white", 
+                          border: selectedItems[item.id] ? "1px solid var(--gold)" : "1px solid var(--border-light)",
+                          borderRadius: "2px",
+                          transition: "all 0.3s ease"
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <div style={{ width: 8, height: 8, border: `1px solid ${item.isVeg ? "#22c55e" : "#ef4444"}`, padding: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <div style={{ width: 4, height: 4, borderRadius: "50%", background: item.isVeg ? "#22c55e" : "#ef4444" }} />
+                              </div>
+                              <h5 style={{ fontSize: "0.95rem", color: "var(--text-dark)", fontWeight: 600 }}>{item.name}</h5>
+                            </div>
+                          </div>
+                          <p style={{ fontSize: "0.85rem", color: "var(--gold-dark)", fontWeight: 700, marginBottom: 16 }}>₹{item.pricePerPlate} <span style={{ fontSize: "0.7rem", fontWeight: 400, color: "var(--text-dark-muted)" }}>/ plate</span></p>
+                          
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            {selectedItems[item.id] ? (
+                              <div style={{ display: "flex", alignItems: "center", gap: 12, background: "white", padding: "4px 8px", borderRadius: "4px", border: "1px solid var(--gold)" }}>
+                                <button onClick={() => removeItem(item.id)} style={{ background: "none", border: "none", color: "var(--maroon)", cursor: "pointer", display: "flex" }}><Minus size={16} /></button>
+                                <span style={{ fontSize: "0.9rem", fontWeight: 700, minWidth: 20, textAlign: "center" }}>{selectedItems[item.id]}</span>
+                                <button onClick={() => addItem(item.id)} style={{ background: "none", border: "none", color: "var(--maroon)", cursor: "pointer", display: "flex" }}><Plus size={16} /></button>
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={() => addItem(item.id)}
+                                style={{ width: "100%", padding: "8px", background: "white", border: "1px solid rgba(201, 161, 74, 0.3)", borderRadius: "4px", color: "var(--text-dark)", fontSize: "0.85rem", cursor: "pointer", transition: "all 0.3s ease", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+                                className="item-add-btn"
+                              >
+                                <Plus size={14} /> Add to Menu
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <p style={{ color: "var(--text-muted)", fontFamily: "'Outfit',sans-serif", fontSize: "0.8rem", lineHeight: 1.6, marginBottom: 10 }}>{m.desc}</p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                      {m.items.map(item => <span key={item} style={{ background: "rgba(201,161,74,0.07)", border: "1px solid rgba(201,161,74,0.15)", color: "var(--warm-white)", fontSize: "0.72rem", padding: "3px 9px", borderRadius: "1px", fontFamily: "'Outfit',sans-serif", opacity: 0.8 }}>{item}</span>)}
-                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 4. Buffet / Serving Options */}
+            <div className="luxury-card-light" style={{ padding: "32px" }}>
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.3rem", color: "var(--text-dark)", marginBottom: 24, display: "flex", alignItems: "center", gap: 12 }}>
+                <Utensils size={20} color="var(--gold-dark)" />
+                Service Methodology
+              </h3>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }} className="service-grid">
+                {SERVICE_OPTIONS.map(opt => (
+                  <div 
+                    key={opt.id} 
+                    onClick={() => toggleService(opt.id)}
+                    style={{ 
+                      padding: "20px", 
+                      textAlign: "center", 
+                      background: selectedServices.includes(opt.id) ? "var(--bg-champagne)" : "white", 
+                      border: selectedServices.includes(opt.id) ? "1px solid var(--gold)" : "1px solid var(--border-light)",
+                      borderRadius: "2px",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      position: "relative"
+                    }}
+                  >
+                    {selectedServices.includes(opt.id) && (
+                      <div style={{ position: "absolute", top: 12, right: 12, color: "var(--gold-dark)" }}>
+                        <Check size={16} strokeWidth={3} />
+                      </div>
+                    )}
+                    <div style={{ fontSize: "2rem", marginBottom: 12 }}>{opt.icon}</div>
+                    <h5 style={{ fontSize: "0.9rem", color: "var(--text-dark)", fontWeight: 600, marginBottom: 4 }}>{opt.label}</h5>
+                    <p style={{ fontSize: "0.75rem", color: "var(--gold-dark)", fontWeight: 600 }}>{opt.price > 0 ? `+₹${opt.price} / plate` : "Included"}</p>
                   </div>
                 ))}
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Step 4 */}
-          {step === 4 && (
-            <div>
-              <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.3rem", color: "var(--warm-white)", marginBottom: 8 }}>Add Live Counters</h3>
-              <p style={{ color: "var(--text-muted)", fontFamily: "'Outfit',sans-serif", fontSize: "0.85rem", marginBottom: 28 }}>Optional premium upsells (price per plate)</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                {addOns.map(a => {
-                  const selected = selectedAddOns.includes(a.name);
-                  return (
-                    <div key={a.name} onClick={() => toggleAddOn(a.name)}
-                      style={{ padding: "20px", background: selected ? "rgba(201,161,74,0.08)" : "rgba(255,255,255,0.03)", border: selected ? "1px solid var(--gold)" : "1px solid rgba(201,161,74,0.12)", borderRadius: "2px", cursor: "pointer", transition: "all 0.3s ease", textAlign: "center" }}>
-                      <div style={{ fontSize: "1.8rem", marginBottom: 8 }}>{a.icon}</div>
-                      <div style={{ color: "var(--warm-white)", fontFamily: "'Outfit',sans-serif", fontSize: "0.85rem", marginBottom: 4 }}>{a.name}</div>
-                      <div style={{ color: "var(--gold)", fontFamily: "'Outfit',sans-serif", fontSize: "0.8rem", fontWeight: 600 }}>+₹{a.price}/plate</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* Sticky Sidebar Summary */}
+          <div style={{ position: "sticky", top: 100 }} className="sidebar-container">
+            <div className="luxury-card-light" style={{ 
+              background: "rgba(255, 255, 255, 0.95)", 
+              backdropFilter: "blur(20px)", 
+              padding: "32px", 
+              border: "1px solid var(--gold)",
+              boxShadow: "0 20px 60px rgba(44,36,24,0.1)"
+            }}>
+              <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.4rem", color: "var(--text-dark)", marginBottom: 28, textAlign: "center" }}>Proposal Summary</h4>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 32 }}>
+                {/* Selected Items Breakdown */}
+                <div style={{ maxHeight: "300px", overflowY: "auto", paddingRight: 10 }}>
+                  {Object.entries(selectedItems).length > 0 ? (
+                    Object.entries(selectedItems).map(([id, qty]) => {
+                      const item = INITIAL_MENU_ITEMS.find(i => i.id === id);
+                      if (!item) return null;
+                      return (
+                        <div key={id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid rgba(201, 161, 74, 0.1)" }}>
+                          <div>
+                            <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-dark)" }}>{item.name}</p>
+                            <p style={{ fontSize: "0.7rem", color: "var(--text-dark-muted)" }}>{qty} x ₹{item.pricePerPlate}</p>
+                          </div>
+                          <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-dark)" }}>₹{item.pricePerPlate * qty}</p>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-dark-muted)", fontStyle: "italic" }}>No items selected yet</p>
+                  )}
+                </div>
 
-          {/* Step 5 */}
-          {step === 5 && (
-            <div>
-              <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.3rem", color: "var(--warm-white)", marginBottom: 24 }}>Your Final Quote</h3>
-              <div style={{ background: "rgba(201,161,74,0.04)", border: "1px solid rgba(201,161,74,0.2)", borderRadius: "2px", padding: "24px", marginBottom: 24 }}>
-                {[
-                  { label: "Event", value: eventType },
-                  { label: "Guests", value: `${guests} guests` },
-                  { label: "Cuisine", value: cuisine },
-                  { label: "Menu", value: menuIdx !== null ? menuCombos[menuIdx].name : "—" },
-                  { label: "Add-ons", value: selectedAddOns.length ? selectedAddOns.join(", ") : "None" },
-                  { label: "Per Plate", value: `₹${totalPerPlate}` },
-                ].map(row => (
-                  <div key={row.label} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(201,161,74,0.08)" }}>
-                    <span style={{ color: "var(--text-muted)", fontFamily: "'Outfit',sans-serif", fontSize: "0.85rem" }}>{row.label}</span>
-                    <span style={{ color: "var(--warm-white)", fontFamily: "'Outfit',sans-serif", fontSize: "0.9rem", fontWeight: 500 }}>{row.value}</span>
+                <div style={{ borderTop: "2px solid var(--gold)", paddingTop: 20 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-dark-muted)" }}>Guests</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>{eventDetails.guests}</span>
                   </div>
-                ))}
-                <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 16, marginTop: 4 }}>
-                  <span style={{ color: "var(--gold)", fontFamily: "'Playfair Display',serif", fontSize: "1rem" }}>Estimated Total</span>
-                  <span style={{ color: "var(--gold)", fontFamily: "'Playfair Display',serif", fontSize: "1.5rem", fontWeight: 700 }}>₹{total.toLocaleString("en-IN")}</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-dark-muted)" }}>Per Plate Rate</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>₹{totalPerPlate.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
+                    <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.2rem", color: "var(--text-dark)" }}>Estimated Total</span>
+                    <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.4rem", fontWeight: 700, color: "var(--maroon)" }}>₹{totalEstimate.toLocaleString("en-IN")}</span>
+                  </div>
                 </div>
               </div>
-              <a href={confirmLink} target="_blank" rel="noopener noreferrer" className="btn-maroon" style={{ width: "100%", justifyContent: "center" }}>
-                <MessageCircle size={16} /> Confirm on WhatsApp
-              </a>
-            </div>
-          )}
 
-          {/* Navigation */}
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 32, gap: 12 }}>
-            {step > 1 && <button onClick={() => setStep(s => s - 1)} className="btn-gold-outline" style={{ padding: "10px 20px", fontSize: "0.8rem" }}><ChevronLeft size={14} /> Back</button>}
-            {step < 5 && <button onClick={() => setStep(s => s + 1)} className="btn-maroon" style={{ marginLeft: "auto", padding: "10px 24px", fontSize: "0.8rem" }}>Continue <ChevronRight size={14} /></button>}
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <a 
+                  href={generateWhatsAppLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-maroon" 
+                  style={{ width: "100%", justifyContent: "center", padding: "16px" }}
+                >
+                  <MessageCircle size={18} /> Get Detailed Quote
+                </a>
+                <p style={{ fontSize: "0.75rem", color: "var(--text-dark-muted)", textAlign: "center", fontStyle: "italic" }}>
+                  * Final quote may vary based on exact menu curation and venue requirements.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <style>{`
+        .item-add-btn:hover {
+          background: var(--gold) !important;
+          color: var(--black) !important;
+          border-color: var(--gold) !important;
+        }
+        @media (max-width: 1024px) {
+          .builder-layout { grid-template-columns: 1fr !important; }
+          .sidebar-container { position: relative !important; top: 0 !important; margin-top: 40px; }
+        }
+        @media (max-width: 640px) {
+          .details-grid { grid-template-columns: 1fr !important; }
+          .service-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </section>
   );
 }

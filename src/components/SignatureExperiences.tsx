@@ -57,9 +57,9 @@ export default function SignatureExperiences() {
   }, []);
 
   return (
-    <section id="experiences" className="section-pad" style={{ background: "var(--black)" }} ref={ref}>
+    <section id="experiences" className="section-pad section-dark" ref={ref}>
       <div style={{ textAlign: "center", padding: "0 24px", marginBottom: 64 }}>
-        <span className="section-label">Signature Experiences</span>
+        <span className="section-label" style={{ color: "var(--gold)" }}>Signature Experiences</span>
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 700, color: "var(--warm-white)", lineHeight: 1.25 }}>
           Imagine Your{" "}
           <em style={{ color: "var(--gold)", fontStyle: "italic" }}>Perfect</em> Celebration
@@ -73,7 +73,7 @@ export default function SignatureExperiences() {
         {experiences.map((exp, i) => (
           <div
             key={i}
-            className="exp-card luxury-card"
+            className="exp-card luxury-card-dark"
             style={{
               display: "grid",
               gridTemplateColumns: i % 2 === 0 ? "1fr 1fr" : "1fr 1fr",

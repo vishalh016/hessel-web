@@ -13,7 +13,7 @@ const photos = [
 
 export default function Gallery() {
   return (
-    <section id="gallery" className="section-pad" style={{ background: "var(--bg-ivory)" }}>
+    <section id="gallery" className="section-pad" style={{ background: "var(--bg-champagne)" }}>
       <div style={{ textAlign: "center", padding: "0 24px", marginBottom: 56 }}>
         <span className="section-label" style={{ color: "var(--gold-dark)" }}>Our Work</span>
         <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 700, color: "var(--text-dark)", lineHeight: 1.25 }}>

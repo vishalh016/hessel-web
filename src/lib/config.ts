@@ -1,16 +1,17 @@
 // Centralized business configuration
-// All values sourced from environment variables
+// All values are strictly sourced from environment variables to prevent leaking secrets in the codebase.
 
 export const BUSINESS_INFO = {
-  name: process.env.NEXT_PUBLIC_BUSINESS_NAME ?? "HALDER'S HESSEL",
-  phone: process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "+916291799615",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "916291799615",
-  email: process.env.NEXT_PUBLIC_EMAIL ?? "contact@haldershessel.com",
-  instagram: process.env.NEXT_PUBLIC_INSTAGRAM ?? "https://instagram.com/haldershessel",
-  facebook: process.env.NEXT_PUBLIC_FACEBOOK ?? "https://facebook.com/haldershessel",
-  location: process.env.NEXT_PUBLIC_LOCATION ?? "Kolkata, West Bengal, India",
-  mapsUrl: process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL ?? "",
-  tagline: process.env.NEXT_PUBLIC_TAGLINE ?? "Make Your Events Hassle-Free With Us",
+  name: process.env.NEXT_PUBLIC_BUSINESS_NAME || "",
+  phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "",
+  email: process.env.NEXT_PUBLIC_EMAIL || "",
+  instagram: process.env.NEXT_PUBLIC_INSTAGRAM || "",
+  facebook: process.env.NEXT_PUBLIC_FACEBOOK || "",
+  location: process.env.NEXT_PUBLIC_LOCATION || "",
+  mapsUrl: process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL || "",
+  tagline: process.env.NEXT_PUBLIC_TAGLINE || "",
+  adminPassword: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "",
 };
 
 /**

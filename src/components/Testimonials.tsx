@@ -59,10 +59,10 @@ export default function Testimonials() {
   }, []);
 
   return (
-    <section id="testimonials" className="section-pad" style={{ background: "linear-gradient(180deg,#0A0A0A,#0D0D0D)" }} ref={ref}>
+    <section id="testimonials" className="section-pad" style={{ background: "var(--bg-champagne)" }} ref={ref}>
       <div style={{ textAlign: "center", padding: "0 24px", marginBottom: 64 }}>
-        <span className="section-label">Client Stories</span>
-        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 700, color: "var(--warm-white)", lineHeight: 1.25 }}>
+        <span className="section-label" style={{ color: "var(--gold-dark)" }}>Client Stories</span>
+        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 700, color: "var(--text-dark)", lineHeight: 1.25 }}>
           Celebrations That{" "}
           <em style={{ color: "var(--gold)", fontStyle: "italic" }}>Speak</em> For Themselves
         </h2>
@@ -70,16 +70,16 @@ export default function Testimonials() {
       </div>
 
       {/* Stats banner */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 0, maxWidth: 700, margin: "0 auto 64px", flexWrap: "wrap", border: "1px solid rgba(212,175,55,0.15)", borderRadius: "2px", overflow: "hidden" }}>
+      <div style={{ display: "flex", justifyContent: "center", gap: 0, maxWidth: 700, margin: "0 auto 64px", flexWrap: "wrap", border: "1px solid rgba(201,161,74,0.25)", borderRadius: "2px", overflow: "hidden" }}>
         {[
           { num: "100+", label: "Events Executed" },
           { num: "98%", label: "Customer Satisfaction" },
           { num: "2,000+", label: "Guests Served" },
           { num: "5★", label: "Average Rating" },
         ].map((stat, i) => (
-          <div key={i} style={{ flex: "1 1 140px", padding: "24px 16px", textAlign: "center", borderRight: i < 3 ? "1px solid rgba(212,175,55,0.12)" : "none", background: "rgba(212,175,55,0.02)" }}>
-            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.8rem", fontWeight: 700, color: "var(--gold)" }}>{stat.num}</div>
-            <div style={{ fontSize: "0.72rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 6, fontFamily: "'Outfit',sans-serif" }}>{stat.label}</div>
+          <div key={i} style={{ flex: "1 1 140px", padding: "24px 16px", textAlign: "center", borderRight: i < 3 ? "1px solid rgba(201,161,74,0.18)" : "none", background: "rgba(201,161,74,0.06)" }}>
+            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.8rem", fontWeight: 700, color: "var(--gold-dark)" }}>{stat.num}</div>
+            <div style={{ fontSize: "0.72rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dark-muted)", marginTop: 6, fontFamily: "'Outfit',sans-serif" }}>{stat.label}</div>
           </div>
         ))}
       </div>
@@ -87,11 +87,11 @@ export default function Testimonials() {
       {/* Testimonial grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 20, maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
         {testimonials.map((t, i) => (
-          <div key={i} className="luxury-card test-card" style={{ padding: "36px 28px", opacity: 0, transform: "translateY(32px)", transition: "opacity 0.6s ease, transform 0.6s ease" }}>
+          <div key={i} className="luxury-card-light test-card" style={{ padding: "36px 28px", opacity: 0, transform: "translateY(32px)", transition: "opacity 0.6s ease, transform 0.6s ease" }}>
             {/* Quote mark */}
-            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "4rem", color: "var(--gold)", opacity: 0.2, lineHeight: 1, marginBottom: -12 }}>"</div>
+            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "4rem", color: "var(--gold-dark)", opacity: 0.15, lineHeight: 1, marginBottom: -12 }}>&quot;</div>
 
-            <p style={{ color: "var(--warm-white)", fontFamily: "'Outfit',sans-serif", fontSize: "0.9rem", lineHeight: 1.8, opacity: 0.85, marginBottom: 28, fontStyle: "italic" }}>
+            <p style={{ color: "var(--text-dark)", fontFamily: "'Outfit',sans-serif", fontSize: "0.9rem", lineHeight: 1.8, opacity: 0.8, marginBottom: 28, fontStyle: "italic" }}>
               {t.quote}
             </p>
 
@@ -100,8 +100,8 @@ export default function Testimonials() {
                 {t.initials}
               </div>
               <div>
-                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "0.95rem", color: "var(--warm-white)", fontWeight: 600 }}>{t.name}</div>
-                <div style={{ fontFamily: "'Outfit',sans-serif", fontSize: "0.75rem", color: "var(--gold)", opacity: 0.8, marginTop: 2, letterSpacing: "0.04em" }}>{t.event}</div>
+                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "0.95rem", color: "var(--text-dark)", fontWeight: 600 }}>{t.name}</div>
+                <div style={{ fontFamily: "'Outfit',sans-serif", fontSize: "0.75rem", color: "var(--gold-dark)", opacity: 0.9, marginTop: 2, letterSpacing: "0.04em" }}>{t.event}</div>
               </div>
             </div>
           </div>

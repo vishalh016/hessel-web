@@ -1,6 +1,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import { MessageCircle, ChevronRight, ChevronLeft } from "lucide-react";
+import { waLink } from "@/lib/config";
 
 const eventTypes = [
   "Wedding",
@@ -43,7 +44,7 @@ export default function QuickQuote() {
       id="quote"
       className="section-pad"
       style={{
-        background: "linear-gradient(180deg, #0D0D0D 0%, #100A0C 100%)",
+        background: "linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-maroon-tint) 100%)",
         position: "relative",
       }}
     >
@@ -406,7 +407,7 @@ export default function QuickQuote() {
               </p>
 
               <a
-                href={`https://wa.me/919999999999?text=${waMessage}`}
+                href={waLink(`Hi Halder's Hessel!\n\nEvent: ${event}\nGuests: ${guests}\nMenu: ${nonVeg ? 'Non-Veg' : 'Veg'}\nEstimate: ₹${total.toLocaleString('en-IN')}\n\nI'd like a detailed quote.`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-maroon"

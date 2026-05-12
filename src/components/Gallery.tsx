@@ -13,14 +13,14 @@ const photos = [
 
 export default function Gallery() {
   return (
-    <section id="gallery" className="section-pad" style={{ background: "var(--black)" }}>
+    <section id="gallery" className="section-pad" style={{ background: "var(--bg-ivory)" }}>
       <div style={{ textAlign: "center", padding: "0 24px", marginBottom: 56 }}>
-        <span className="section-label">Our Work</span>
-        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 700, color: "var(--warm-white)", lineHeight: 1.25 }}>
+        <span className="section-label" style={{ color: "var(--gold-dark)" }}>Our Work</span>
+        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 700, color: "var(--text-dark)", lineHeight: 1.25 }}>
           Moments We&apos;ve{" "}
           <em style={{ color: "var(--gold)", fontStyle: "italic" }}>Curated</em>
         </h2>
-        <p style={{ marginTop: 12, color: "var(--text-muted)", fontFamily: "'Outfit',sans-serif", fontSize: "0.95rem" }}>
+        <p style={{ marginTop: 12, color: "var(--text-dark-muted)", fontFamily: "'Outfit',sans-serif", fontSize: "0.95rem" }}>
           A glimpse into the celebrations we&apos;ve brought to life
         </p>
       </div>

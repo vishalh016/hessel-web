@@ -1,32 +1,43 @@
 @import "tailwindcss";
 
 :root {
-  --black: #0D0D0D;
-  --gold: #D4AF37;
-  --gold-light: #E8C84A;
-  --gold-dark: #B8962E;
-  --maroon: #5A0B16;
-  --maroon-light: #7A1020;
-  --warm-white: #F5F1E8;
-  --warm-white-dim: #E8E2D3;
-  --text-muted: #9A9080;
-  --card-bg: #141414;
-  --border: rgba(212, 175, 55, 0.2);
+  /* ── Core Brand Colors ─────────────────────── */
+  --charcoal: #1A1A1A;          /* Rich charcoal — replaces harsh matte black */
+  --charcoal-deep: #111111;     /* Deeper charcoal for footers/nav */
+  --gold: #C9A14A;              /* Premium muted gold */
+  --gold-light: #E5D3A1;        /* Soft champagne */
+  --gold-dark: #A8843E;         /* Deep antique gold */
+  --maroon: #5A0B16;            /* Deep maroon */
+  --maroon-light: #7A1020;      /* Lighter maroon for hover */
+  --ivory: #F8F4EC;             /* Warm ivory — primary light bg */
+  --champagne: #EDE0C4;         /* Champagne tint */
+  --warm-white: #F8F4EC;        /* Text on dark backgrounds */
+  --warm-white-dim: #E8DFD0;
+  --text-muted: #9A8B6E;        /* Warm muted body text */
+  --text-dark: #2C2418;         /* Dark text on light bg */
+  --text-dark-muted: #6B5C42;   /* Muted text on light bg */
+
+  /* ── Section Backgrounds ──────────────────── */
+  --bg-dark: #1A1A1A;           /* Rich charcoal sections */
+  --bg-darker: #111111;         /* Deeper dark sections */
+  --bg-ivory: #F8F4EC;          /* Light ivory sections */
+  --bg-champagne: #F0E6D2;      /* Warm champagne sections */
+  --bg-maroon-tint: #1A0509;    /* Maroon-tinted dark */
+  --card-bg-dark: #201A14;      /* Cards on dark bg */
+  --card-bg-light: #FFFFFF;     /* Cards on light bg */
+
+  /* ── Borders ──────────────────────────────── */
+  --border-gold: rgba(201,161,74,0.25);
+  --border-gold-strong: rgba(201,161,74,0.5);
+  --border-light: rgba(44,36,24,0.1);
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
 body {
-  background-color: var(--black);
-  color: var(--warm-white);
+  background-color: var(--ivory);
+  color: var(--text-dark);
   font-family: 'Outfit', 'Inter', sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -36,175 +47,183 @@ h1, h2, h3, h4 {
   font-family: 'Playfair Display', Georgia, serif;
 }
 
-/* Scrollbar */
+/* ── Scrollbar ────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-track { background: var(--charcoal-deep); }
 ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
-/* Gold divider */
+/* ── Selection ────────────────────────────── */
+::selection { background: var(--gold); color: var(--charcoal); }
+
+/* ── Gold Divider ─────────────────────────── */
 .gold-divider {
-  width: 60px;
-  height: 2px;
+  width: 60px; height: 2px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
   margin: 0 auto;
 }
 
-/* Selection color */
-::selection {
-  background: var(--gold);
-  color: var(--black);
-}
+/* ── Section Padding ──────────────────────── */
+.section-pad { padding: 96px 0; }
+@media (max-width: 768px) { .section-pad { padding: 64px 0; } }
 
-/* Luxury card base */
-.luxury-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  transition: all 0.4s ease;
-}
-
-.luxury-card:hover {
-  border-color: rgba(212, 175, 55, 0.5);
-  box-shadow: 0 8px 40px rgba(212, 175, 55, 0.08);
-}
-
-/* Section padding */
-.section-pad {
-  padding: 96px 0;
-}
-
-@media (max-width: 768px) {
-  .section-pad {
-    padding: 64px 0;
-  }
-}
-
-/* Gold text */
-.gold-text {
-  color: var(--gold);
-}
-
-/* Maroon button */
-.btn-maroon {
-  background: var(--maroon);
-  color: var(--warm-white);
-  border: 1px solid transparent;
-  padding: 14px 32px;
-  font-family: 'Outfit', sans-serif;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 1px;
-}
-
-.btn-maroon:hover {
-  background: var(--maroon-light);
-  border-color: var(--gold);
-  box-shadow: 0 4px 20px rgba(90, 11, 22, 0.4);
-  transform: translateY(-1px);
-}
-
-/* Gold outline button */
-.btn-gold-outline {
-  background: transparent;
-  color: var(--gold);
-  border: 1px solid var(--gold);
-  padding: 14px 32px;
-  font-family: 'Outfit', sans-serif;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 1px;
-}
-
-.btn-gold-outline:hover {
-  background: var(--gold);
-  color: var(--black);
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
-  transform: translateY(-1px);
-}
-
-/* Gradient overlays */
-.overlay-dark {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(13,13,13,0.3) 0%,
-    rgba(13,13,13,0.5) 50%,
-    rgba(13,13,13,0.85) 100%
-  );
-}
-
-/* Section label */
+/* ── Section Labels ───────────────────────── */
 .section-label {
   font-family: 'Outfit', sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.25em;
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gold);
   display: block;
   margin-bottom: 16px;
 }
+.section-label-dark { color: var(--gold-dark); }
 
-/* Animated gold underline */
-.gold-underline {
-  position: relative;
-  display: inline-block;
+/* ── Section Themes ───────────────────────── */
+/* Dark section — charcoal background */
+.section-dark {
+  background: var(--bg-dark);
+  color: var(--warm-white);
 }
-.gold-underline::after {
+.section-dark h2, .section-dark h3 { color: var(--warm-white); }
+.section-dark p { color: var(--text-muted); }
+
+/* Light section — warm ivory */
+.section-light {
+  background: var(--bg-ivory);
+  color: var(--text-dark);
+}
+.section-light h2, .section-light h3 { color: var(--text-dark); }
+.section-light p { color: var(--text-dark-muted); }
+
+/* Champagne section */
+.section-champagne {
+  background: var(--bg-champagne);
+  color: var(--text-dark);
+}
+
+/* ── Cards ────────────────────────────────── */
+.luxury-card-dark {
+  background: var(--card-bg-dark);
+  border: 1px solid var(--border-gold);
+  border-radius: 2px;
+  transition: all 0.4s ease;
+}
+.luxury-card-dark:hover {
+  border-color: var(--border-gold-strong);
+  box-shadow: 0 8px 40px rgba(201,161,74,0.08);
+}
+.luxury-card-light {
+  background: var(--card-bg-light);
+  border: 1px solid var(--border-light);
+  border-radius: 2px;
+  transition: all 0.4s ease;
+  box-shadow: 0 2px 20px rgba(44,36,24,0.06);
+}
+.luxury-card-light:hover {
+  box-shadow: 0 8px 40px rgba(201,161,74,0.15);
+  border-color: rgba(201,161,74,0.3);
+}
+/* backward compat */
+.luxury-card {
+  background: var(--card-bg-dark);
+  border: 1px solid var(--border-gold);
+  border-radius: 2px;
+  transition: all 0.4s ease;
+}
+.luxury-card:hover {
+  border-color: var(--border-gold-strong);
+  box-shadow: 0 8px 40px rgba(201,161,74,0.08);
+}
+
+/* ── Buttons ──────────────────────────────── */
+.btn-maroon {
+  background: var(--maroon);
+  color: var(--warm-white);
+  border: 1px solid transparent;
+  padding: 14px 36px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.35s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 1px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+.btn-maroon::after {
   content: '';
   position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: var(--gold);
-  transition: width 0.4s ease;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(201,161,74,0.0), rgba(201,161,74,0.15));
+  opacity: 0;
+  transition: opacity 0.35s ease;
 }
-.gold-underline:hover::after {
-  width: 100%;
+.btn-maroon:hover {
+  background: var(--maroon-light);
+  border-color: var(--gold);
+  box-shadow: 0 6px 28px rgba(90,11,22,0.35), 0 0 0 1px rgba(201,161,74,0.3);
+  transform: translateY(-2px);
+}
+.btn-maroon:hover::after { opacity: 1; }
+
+.btn-gold-outline {
+  background: rgba(248,244,236,0.08);
+  color: var(--gold-light);
+  border: 1px solid var(--gold);
+  padding: 14px 36px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.35s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 1px;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+}
+.btn-gold-outline:hover {
+  background: var(--gold);
+  color: var(--charcoal);
+  box-shadow: 0 6px 24px rgba(201,161,74,0.3);
+  transform: translateY(-2px);
 }
 
-/* Range input styling */
+/* ── Gold text utility ────────────────────── */
+.gold-text { color: var(--gold); }
+
+/* ── Range Input ──────────────────────────── */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  width: 100%;
-  height: 2px;
-  background: rgba(212,175,55,0.3);
+  width: 100%; height: 2px;
+  background: rgba(201,161,74,0.25);
   outline: none;
   border-radius: 2px;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 18px; height: 18px;
   border-radius: 50%;
   background: var(--gold);
   cursor: pointer;
-  border: 2px solid var(--black);
-  box-shadow: 0 0 8px rgba(212,175,55,0.5);
+  border: 2px solid var(--charcoal);
+  box-shadow: 0 0 10px rgba(201,161,74,0.5);
 }
 input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 18px; height: 18px;
   border-radius: 50%;
   background: var(--gold);
   cursor: pointer;
-  border: 2px solid var(--black);
+  border: 2px solid var(--charcoal);
 }
